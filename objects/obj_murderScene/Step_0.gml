@@ -1,0 +1,384 @@
+/// @description Insert description here
+// You can write your code in this editor
+camera_x=camera_get_view_x(view_camera[0]);
+camera_y=camera_get_view_y(view_camera[0]);
+camera_w=camera_get_view_width(view_camera[0]);
+camera_h=camera_get_view_height(view_camera[0])
+
+
+if(keyboard_check_pressed(vk_space)&&alarm_get(0)>0){
+	alarm_set(0,1);
+}
+
+if(scene_transition){
+	if(fade_out){
+		show_debug_message(fade_amount);
+		if(instance_exists(obj_setting_wall)){
+			instance_destroy(obj_setting_wall);
+		}
+			layer_background_blend(layer_background_get_id("Background"),merge_color(c_white,c_black,fade_amount));
+		if(fade_amount>=1){
+			if(seventh_scene){
+				layer_background_sprite(layer_background_get_id("Background"),spr_MurderScene_bg2);
+				thief = instance_create_layer(416,608,"Instances",obj_thiefBegin);
+				thief.image_blend=c_black;
+				damsel=instance_create_layer(704,640,"Instances",obj_damselBegin);
+				damsel.image_xscale=-1;
+				damsel.image_blend=c_black;
+				fade_out=false;
+			}
+			else{
+				obj_thiefBegin.image_alpha=lerp(1,0,fade_amount);
+			}
+		}
+		else{
+			fade_amount+=.01;
+			if(!seventh_scene){
+				obj_thiefBegin.image_alpha=lerp(1,0,fade_amount);
+			}
+		}
+	}
+	else{
+		layer_background_blend(layer_background_get_id("Background"),merge_color(c_white,c_black,fade_amount));
+		fade_amount-=.01;
+		if(seventh_scene){
+			obj_thiefBegin.image_blend=merge_color(c_white,c_black,fade_amount)
+			obj_damselBegin.image_blend=merge_color(c_white,c_black,fade_amount)
+		}
+		if(fade_amount<=0){
+			fade_out=true;
+			scene_transition=false;
+			if(seventh_scene){
+				seventh_scene=false;
+				scene_transition=false;
+				obj_thiefBegin.image_blend=merge_color(c_white,c_black,fade_amount)
+				obj_damselBegin.image_blend=merge_color(c_white,c_black,fade_amount)
+				eighth_scene=true;
+				new_wall=instance_create_layer(240,372,"Instances",obj_setting_wall);
+				new_wall.depth=-1;
+				next_message=ds_list_find_value(eighth_scene_messages,dialogue_index);
+				if(ds_map_find_value(next_message,"side")="left"){
+					message_side_left=next_message
+				}
+				else{
+					message_side_right=next_message
+				}
+				alarm[0]=room_speed*3;
+			}
+		}
+	}
+}
+
+if(first_scene){ //simulate a conversation starting
+	//make the player walk until it reaches a certain point then turn around
+	if(obj_playerBegin.x>608){
+		obj_playerBegin.sprite_index=spr_playerBegin_walking;
+		obj_playerBegin.image_xscale=-1;
+		obj_playerBegin.x-=4;
+	}
+	else{
+		obj_playerBegin.sprite_index=spr_playerBegin_idle;
+		obj_playerBegin.image_xscale=1;
+		first_scene=false;
+		second_scene=true;
+		draw_messages=true;
+		next_message=ds_list_find_value(second_scene_messages,dialogue_index);
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message
+		}
+		else{
+			message_side_right=next_message
+		}
+		alarm[0]=room_speed*3;
+	}
+	//make the friend walk until it reaches a certain point then stop
+	if(obj_friendBegin.x>832){
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=-1;
+		obj_friendBegin.x-=4;
+	}
+	else{
+		obj_friendBegin.sprite_index=spr_friendBegin_idle;
+	}
+}
+else if(third_scene){
+	if(obj_friendBegin.bbox_left<room_width){
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=1;
+		obj_friendBegin.x+=4;
+	}
+	else if(camera_x!=0){
+		if(camera_x>0){
+			if(keyboard_check_pressed(vk_space)){
+				camera_set_view_pos(view_camera[0],0,camera_y)
+			}
+			else{
+				camera_set_view_pos(view_camera[0],camera_x-4,camera_y)
+			}
+			camera_x=camera_get_view_x(view_camera[0]);
+			if(lerp(0,room_height,camera_x/room_width)<camera_y){
+				camera_set_view_pos(view_camera[0],camera_x,lerp(0,room_height,camera_x/room_width));
+			}
+			else{
+				camera_set_view_pos(view_camera[0],camera_x,camera_y);
+			}
+			camera_y=camera_get_view_y(view_camera[0]);
+			camera_set_view_size(view_camera[0],lerp(room_width,0,camera_x/room_width),lerp(room_height,0,camera_y/room_height));
+		}
+		camera_set_view_target(view_camera[0],noone);
+	}
+	else{
+		third_scene=false;
+		fourth_scene=true;
+		obj_playerBegin.image_xscale=-1;
+		next_message=ds_list_find_value(fourth_scene_messages,dialogue_index);
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message
+		}
+		else{
+			message_side_right=next_message
+		}
+		alarm[0]=room_speed*3;
+	}
+}
+
+else if(fourth_scene){
+	if(dialogue_index=3){
+		if(keyboard_check_pressed(ord("Y"))){
+			alarm[0]=1;
+		}
+		else if(keyboard_check_pressed(ord("N"))){
+			fourth_scene=false;
+			wimp1_scene1=true;
+			message_side_left=undefined;
+			message_side_right=undefined;
+			dialogue_index=0;
+		}
+	}
+}
+else if(wimp1_scene1){
+	if(obj_playerBegin.x<760){
+		obj_playerBegin.sprite_index=spr_playerBegin_walking;
+		obj_playerBegin.image_xscale=1;
+		obj_playerBegin.x+=4;
+	}
+	else if(obj_friendBegin.x>880){
+		obj_playerBegin.sprite_index=spr_playerBegin_idle;
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=-1;
+		obj_friendBegin.x-=4;
+	}
+	else{
+		obj_friendBegin.sprite_index=spr_friendBegin_idle;
+		wimp1_scene1=false;
+		caught_wimping_scene=true;
+		next_message=ds_list_find_value(caught_wimping_messages,dialogue_index);
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message
+		}
+		else{
+			message_side_right=next_message
+		}
+		dialogue_index=0;
+		alarm[0]=room_speed*3;
+	}
+}
+else if(caught_wimping_scene&&dialogue_index=2){
+	if(obj_playerBegin.bbox_right>0){
+		obj_playerBegin.sprite_index=spr_playerBegin_walking;
+		obj_playerBegin.image_xscale=-1;
+		obj_playerBegin.x-=4;
+	}
+	else{
+		alarm[0]=1;
+	}
+}
+else if(caught_wimping_scene&&dialogue_index=3){
+	if(obj_friendBegin.bbox_right>0){
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=-1;
+		obj_friendBegin.x-=6;
+	}
+	else{
+		alarm[0]=1;
+	}
+}
+else if(fifth_scene){
+	if(obj_playerBegin.bbox_right>0){
+		obj_playerBegin.sprite_index=spr_playerBegin_walking;
+		obj_playerBegin.image_xscale=-1;
+		obj_playerBegin.x-=6;
+	}
+	else{
+		fifth_scene=false;
+		sixth_scene=true;
+		next_message=ds_list_find_value(sixth_scene_messages,dialogue_index);
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message
+		}
+		else{
+			message_side_right=next_message
+		}
+		alarm[0]=room_speed*3;
+	}
+}
+else if(sixth_scene){
+	if(obj_friendBegin.x>700){
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=-1;
+		obj_friendBegin.x-=6;
+		}
+		else{
+			obj_friendBegin.sprite_index=spr_friendBegin_idle;
+		}
+}
+else if(seventh_scene){
+	if(obj_friendBegin.bbox_right>0){
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=-1;
+		obj_friendBegin.x-=6;
+	}
+	else{
+		scene_transition=true;
+	}
+}
+else if(ninth_scene){
+	if(obj_playerBegin.x>544){
+		obj_playerBegin.sprite_index=spr_playerBegin_walking;
+		obj_playerBegin.image_xscale=-1;
+		obj_playerBegin.x-=2;
+	}
+	else if(obj_playerBegin.y<480){
+		obj_playerBegin.sprite_index=spr_playerBegin_walkingForward;
+		obj_playerBegin.y+=3;
+	}
+	else{
+		obj_playerBegin.sprite_index=spr_playerBegin_idleForward;
+		ninth_scene=false;
+		tenth_scene=true;
+		next_message=ds_list_find_value(tenth_scene_messages,dialogue_index);
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message
+		}
+		else{
+			message_side_right=next_message
+		}
+		alarm[0]=room_speed*3;
+	}
+}
+else if(eleventh_scene){
+	if(obj_friendBegin.x>680){
+		obj_friendBegin.sprite_index=spr_friendBegin_walking;
+		obj_friendBegin.image_xscale=-1;
+		obj_friendBegin.x-=2;
+	}
+	else if(obj_friendBegin.y<480){
+		obj_friendBegin.sprite_index=spr_friendBegin_walkingForward;
+		obj_friendBegin.y+=3;
+	}
+	else{
+		obj_friendBegin.sprite_index=spr_friendBegin_idleForward;
+		eleventh_scene=false;
+		twelfth_scene=true;
+		next_message=ds_list_find_value(twelfth_scene_messages,dialogue_index);
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message
+		}
+		else{
+			message_side_right=next_message
+		}
+		alarm[0]=room_speed*3;
+	}
+}
+else if(twelfth_scene&&dialogue_index=1){
+	obj_thiefBegin.can_battle=true;
+}
+else if(thirteenth_scene){
+	if(!player_dead){
+		if(obj_thiefBegin.image_angle>0){
+			obj_playerBegin.sprite_index=spr_playerBegin_walkingBackward;
+			obj_playerBegin.image_xscale=1;
+			obj_thiefBegin.image_angle-=1;
+			obj_playerBegin.y-=1;
+		}
+		else {
+			if(obj_thiefBegin.x<obj_playerBegin.x){
+				obj_thiefBegin.x+=2;
+				obj_playerBegin.y-=1;
+			}
+			else {
+				obj_playerBegin.y-=1;
+				obj_thiefBegin.sprite_index=spr_thiefBegin_idleBackward;
+				obj_battleFlash.image_alpha=1;
+				if(alarm_get(1)<0){
+					alarm[1]=room_speed*.3;
+				}
+			}
+		}
+	}
+	else{
+		if(obj_playerBegin.image_angle>-90){
+			obj_playerBegin.image_angle-=1;
+		}
+		else{
+			thirteenth_scene=false
+			player_death_scene=true;
+			scene_transition=true;
+			next_message=ds_list_find_value(player_death_messages,dialogue_index);
+			if(ds_map_find_value(next_message,"side")="left"){
+				message_side_left=next_message
+			}
+			else{
+				message_side_right=next_message
+			}
+			alarm[0]=room_speed*3;
+		}
+	}
+}
+else if(player_death_scene&&dialogue_index=1){
+	if(keyboard_check_pressed(ord("Y"))){
+		second_chance=true;
+		player_death_scene=false;
+		chose_path=true;
+		dialogue_index+=2;
+		next_message=ds_list_find_value(player_death_messages,dialogue_index)
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message;
+		}
+		else if(ds_map_find_value(next_message,"side")="right"){
+			message_side_right=next_message;
+		}
+	}
+	else if(keyboard_check_pressed(ord("N"))){
+		second_chance=false;
+		player_death_scene=false;
+		chose_path=true;
+		dialogue_index+=1;
+		next_message=ds_list_find_value(player_death_messages,dialogue_index)
+		if(ds_map_find_value(next_message,"side")="left"){
+			message_side_left=next_message;
+		}
+		else if(ds_map_find_value(next_message,"side")="right"){
+			message_side_right=next_message;
+		}
+	}
+}
+else if(chose_path){
+	if(!second_chance){
+		obj_battleFlash.image_blend=c_black;
+		obj_battleFlash.image_alpha+=.005;
+		if(obj_battleFlash.image_alpha>=1){
+			game_end();
+		}
+	}
+	else{
+		obj_battleFlash.image_blend=c_white;
+		if(obj_battleFlash.image_alpha>=1){
+			room_set_persistent(rm_MurderScene,false);
+			room_goto(rm_startScreen);
+		}
+		else{
+			obj_battleFlash.image_alpha+=.005;
+		}
+	}
+}

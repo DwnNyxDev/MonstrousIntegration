@@ -1,0 +1,33 @@
+/// @description Insert description here
+// You can write your code in this editor
+card=noone;
+card_name=noone;
+level=noone;
+enemy=noone;
+hovered=false;
+previously_hovered=false;
+card_right=noone;
+card_left=noone;
+number=noone;
+revealed=true;
+deck=noone;
+card_hovered=false;
+owner=noone;
+in_place=false;
+deck_glow_opacity=1;
+deck_glow_fade=true;
+in_graveyard=false;
+transform=false;
+new_punch=noone;
+reward=false;
+graveyard=noone;
+in_deck=false;
+view_x=0;
+view_y=0;
+view_w=0;
+view_h=0;
+selected=false;
+previous_card=noone;
+position=noone;
+display=false;
+merged=noone;

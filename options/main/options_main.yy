@@ -1,0 +1,16 @@
+{
+  "option_gameguid": "8ed3136f-6c8e-41f8-a9f1-ee18468a92cd",
+  "option_game_speed": 60,
+  "option_mips_for_3d_textures": false,
+  "option_draw_colour": 4294967295,
+  "option_window_colour": 4278190080,
+  "option_steam_app_id": "0",
+  "option_sci_usesci": true,
+  "option_author": "Vandell Vatel",
+  "option_lastchanged": "09 October 2021 2:51:43",
+  "option_spine_licence": false,
+  "resourceVersion": "1.2",
+  "name": "Main",
+  "tags": [],
+  "resourceType": "GMMainOptions",
+}
